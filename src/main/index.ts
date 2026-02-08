@@ -1,7 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, clipboard, Notification, nativeImage } from 'electron'
 import { exec } from 'child_process'
 import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import iconWin from '../../resources/icon.ico?asset'
 import { initDb } from './db'

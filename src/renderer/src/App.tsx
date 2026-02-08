@@ -27,22 +27,40 @@ const App: React.FC = () => {
   });
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const clipsRef = useRef<Clip[]>([]);
+  clipsRef.current = clips;
+  const selectedIndexRef = useRef(0);
+  selectedIndexRef.current = selectedIndex;
+
   useEffect(() => {
     loadClips();
     loadSettings();
 
-    window.api.onNewClip(() => {
-      loadClips();
+    const unsubscribe = window.api.onNewClip((clip: Clip) => {
+      setClips(prev => {
+        // Prevent duplicates and only add if we are on 'all' tab
+        if (activeTab === 'all' && !prev.find(c => c.id === clip.id)) {
+          return [clip, ...prev];
+        }
+        return prev;
+      });
     });
 
+    return () => unsubscribe();
+  }, [activeTab]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
-        setSelectedIndex((prev) => Math.min(prev + 1, clips.length - 1));
+        e.preventDefault();
+        setSelectedIndex((prev) => Math.min(prev + 1, clipsRef.current.length - 1));
       } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
         setSelectedIndex((prev) => Math.max(prev - 1, 0));
       } else if (e.key === 'Enter') {
-        if (clips[selectedIndex]) {
-          handlePaste(clips[selectedIndex].content_plain);
+        const currentClip = clipsRef.current[selectedIndexRef.current];
+        if (currentClip) {
+          handlePaste(currentClip.content_plain);
         }
       } else if (e.key === 'Escape') {
         window.api.hideWindow();
@@ -51,7 +69,7 @@ const App: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [clips, selectedIndex]);
+  }, []); // Rebind-free event listener
 
   useEffect(() => {
     const activeElement = document.getElementById(`clip-${selectedIndex}`);
@@ -105,29 +123,36 @@ const App: React.FC = () => {
   const handleClearHistory = async () => {
     if (confirm('Are you sure you want to clear all history? This cannot be undone.')) {
       await window.api.clearHistory();
-      loadClips();
+      setClips([]);
     }
   };
 
-  const handleSearch = async (val: string) => {
+  // Search Debouncing logic
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSearch = (val: string) => {
     setSearch(val);
-    setSelectedIndex(0);
-    if (val.trim()) {
-      const data = await window.api.searchClips(val);
-      setClips(data);
-    } else {
-      loadClips();
-    }
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      setSelectedIndex(0);
+      if (val.trim()) {
+        const data = await window.api.searchClips(val);
+        setClips(data);
+      } else {
+        loadClips();
+      }
+    }, 150); // 150ms debounce for responsiveness
   };
 
   const toggleFavorite = async (id: string) => {
     await window.api.toggleFavorite(id);
-    loadClips();
+    setClips(prev => prev.map(c => c.id === id ? { ...c, is_favorite: c.is_favorite ? 0 : 1 } : c));
   };
 
   const deleteClip = async (id: string) => {
     await window.api.deleteClip(id);
-    loadClips();
+    setClips(prev => prev.filter(c => c.id !== id));
   };
 
   const handlePaste = async (text: string) => {

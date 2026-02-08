@@ -13,7 +13,11 @@ const api = {
   updateSettings: (settings: any) => ipcRenderer.invoke('update-settings', settings),
   clearHistory: () => ipcRenderer.invoke('clear-history'),
   onNewClip: (callback: (clip: any) => void) => {
-    ipcRenderer.on('new-clip', (_event, clip) => callback(clip));
+    const listener = (_event, clip): void => callback(clip);
+    ipcRenderer.on('new-clip', listener);
+    return () => {
+      ipcRenderer.removeListener('new-clip', listener);
+    };
   }
 }
 
