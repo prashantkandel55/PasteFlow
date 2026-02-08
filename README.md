@@ -4,6 +4,10 @@
 
 ![Dashboard Preview](resources/dashboard.png)
 
+## 🎥 Demo Video
+
+https://github.com/prashantkandel55/PasteFlow/raw/main/resources/PasteFlow.mp4
+
 ## Features
 
 - **Instant History**: Access your last 100+ copies instantly with `Alt + V`.
