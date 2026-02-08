@@ -6,7 +6,7 @@
 
 ## 🎥 Demo Video
 
-https://github.com/prashantkandel55/PasteFlow/raw/main/resources/PasteFlow.mp4
+![PasteFlow Demo](resources/PasteFlow.mp4)
 
 ## Features
 
