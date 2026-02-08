@@ -6,7 +6,7 @@
 
 ## 🎥 Demo Video
 
-![PasteFlow Demo](resources/PasteFlow.mp4)
+<video src="resources/PasteFlow.mp4" controls muted style="max-width: 100%; height: auto;"></video>
 
 ## Features
 
