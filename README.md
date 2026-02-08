@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="resources/icon.png" width="128" height="128" />
+</p>
+
 # PasteFlow
 
 **Never lose a copy again.** PasteFlow is a premium, keyboard-first clipboard manager built for speed and visual excellence.
